@@ -1,405 +1,329 @@
-/* ============================================================
-   PHẦN 1 — GIAO DIỆN (chạy độc lập, luôn hoạt động dù Firebase lỗi)
-   ============================================================ */
+// ---------- Envelope open ----------
+  const envelope = document.getElementById('envelope');
+  const envScreen = document.getElementById('envelope-screen');
+  const nav = document.getElementById('nav');
+  const music = document.getElementById('bg-music');
 
-/* ---------- Mở thiệp: chạm vào dấu sáp ---------- */
-const cover = document.getElementById('cover');
-const envelope = document.getElementById('envelope');
-const waxSeal = document.getElementById('wax-seal');
-const audio = document.getElementById('bg-audio');
-const musicBtn = document.getElementById('music-btn');
-let coverOpened = false;
+  envelope.addEventListener('click', () => {
+    envelope.classList.add('open');
+    music.play().catch(()=>{});
+    document.getElementById('music-toggle').classList.add('spin');
+    setTimeout(() => {
+      envScreen.classList.add('opened');
+      nav.classList.add('show');
+    }, 750);
+  });
 
-function openInvitation(){
-  if(coverOpened) return;
-  coverOpened = true;
-
-  // 1. dấu sáp vỡ ra + ruy băng tách đôi
-  envelope.classList.add('open');
-
-  if(audio && audio.getAttribute('src')){
-    audio.play()
-      .then(()=> musicBtn.classList.add('spin'))
-      .catch(err=> console.warn('Nhạc nền không tự phát được (thường do trình duyệt chặn autoplay hoặc sai đường dẫn file):', err));
-  }
-
-  // 2. sau khi animation chạy xong, fade toàn bộ cover ra
-  setTimeout(()=>{
-    cover.classList.add('hide');
-    setTimeout(()=> cover.style.display='none', 700);
-  }, 750);
-}
-
-// chạm vào dấu sáp hoặc bất kỳ đâu trên thiệp đều mở được
-if(waxSeal) waxSeal.addEventListener('click', openInvitation);
-if(cover) cover.addEventListener('click', openInvitation);
-
-if(musicBtn){
-  musicBtn.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    if(!audio || !audio.getAttribute('src')) return;
-    if(audio.paused){
-      audio.play()
-        .then(()=> musicBtn.classList.add('spin'))
-        .catch(err=> console.warn('Không phát được nhạc:', err));
+  // ---------- Music toggle ----------
+  const musicBtn = document.getElementById('music-toggle');
+  musicBtn.addEventListener('click', () => {
+    if (music.paused) {
+      music.play().catch(()=>{});
+      musicBtn.classList.add('spin');
     } else {
-      audio.pause();
+      music.pause();
       musicBtn.classList.remove('spin');
     }
   });
-}
 
-/* ---------- Đếm ngược ---------- */
-// Countdown — đặt đúng ngày giờ cưới tại đây
-const weddingDate = new Date('2026-10-25T10:00:00+07:00').getTime();
+  // ---------- Countdown ----------
+  const weddingDate = new Date('2026-11-01T08:00:00+07:00').getTime();
+  function updateCountdown(){
+    const now = Date.now();
+    const diff = Math.max(0, weddingDate - now);
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+    document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 
-function updateCountdown(){
-  const now = Date.now();
-  let diff = weddingDate - now;
-  if(diff < 0) diff = 0;
-  const d = Math.floor(diff / (1000*60*60*24));
-  const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-  const m = Math.floor((diff % (1000*60*60)) / (1000*60));
-  const s = Math.floor((diff % (1000*60)) / 1000);
-  const elD = document.getElementById('cd-days');
-  const elH = document.getElementById('cd-hours');
-  const elM = document.getElementById('cd-mins');
-  const elS = document.getElementById('cd-secs');
-  if(elD) elD.textContent = String(d).padStart(2,'0');
-  if(elH) elH.textContent = String(h).padStart(2,'0');
-  if(elM) elM.textContent = String(m).padStart(2,'0');
-  if(elS) elS.textContent = String(s).padStart(2,'0');
-}
-updateCountdown();
-setInterval(updateCountdown, 1000);
+  // ---------- Scroll reveal ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
 
-/* ---------- Lightbox: chạm ảnh để xem toàn màn hình + vuốt chuyển ảnh ---------- */
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const lightboxClose = document.getElementById('lightbox-close');
-const lightboxPrev = document.getElementById('lightbox-prev');
-const lightboxNext = document.getElementById('lightbox-next');
-const lightboxCounter = document.getElementById('lightbox-counter');
+  // ---------- Gallery: swipeable carousel ----------
+  const galleryTrack = document.getElementById('gallery-track');
+  if (galleryTrack) {
+    const galleryItems = galleryTrack.querySelectorAll('.gal-item');
+    const galleryCounter = document.getElementById('gallery-counter');
+    const total = galleryItems.length;
 
-const galleryImages = Array.from(document.querySelectorAll('.g-item')).map(item => item.getAttribute('data-full'));
-let currentImgIndex = 0;
+    function updateActiveSlide(){
+      const trackRect = galleryTrack.getBoundingClientRect();
+      const center = trackRect.left + trackRect.width / 2;
+      let closestIndex = 0;
+      let closestDist = Infinity;
+      galleryItems.forEach((item, i) => {
+        const r = item.getBoundingClientRect();
+        const itemCenter = r.left + r.width / 2;
+        const dist = Math.abs(itemCenter - center);
+        if (dist < closestDist) { closestDist = dist; closestIndex = i; }
+      });
+      galleryItems.forEach((item, i) => item.classList.toggle('active', i === closestIndex));
+      if (galleryCounter) galleryCounter.textContent = `${closestIndex + 1} / ${total}`;
+    }
 
-function showLightboxImage(index, instant){
-  if(galleryImages.length === 0) return;
-  currentImgIndex = (index + galleryImages.length) % galleryImages.length;
+    function slideStep(){
+      const gap = parseFloat(getComputedStyle(galleryTrack).gap) || 0;
+      const w = galleryItems[0].getBoundingClientRect().width;
+      return w + gap;
+    }
 
-  const render = ()=>{
-    lightboxImg.src = galleryImages[currentImgIndex];
-    lightboxImg.classList.remove('switching');
-    if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
-  };
+    let scrollDebounce;
+    galleryTrack.addEventListener('scroll', () => {
+      clearTimeout(scrollDebounce);
+      scrollDebounce = setTimeout(updateActiveSlide, 60);
+    });
 
-  if(instant){
-    render();
-  } else {
-    lightboxImg.classList.add('switching');
-    setTimeout(render, 150);
+    document.getElementById('gallery-prev').addEventListener('click', () => {
+      galleryTrack.scrollBy({ left: -slideStep(), behavior: 'smooth' });
+    });
+    document.getElementById('gallery-next').addEventListener('click', () => {
+      galleryTrack.scrollBy({ left: slideStep(), behavior: 'smooth' });
+    });
+
+   // ---------- Lightbox: fullscreen photo viewer ----------
+    const lightbox = document.getElementById('lightbox');
+    const lightboxContent = document.getElementById('lightbox-content');
+    let lightboxIndex = 0;
+
+    function renderLightbox(){
+      const sourceItem = galleryItems[lightboxIndex];
+      const sourceImg = sourceItem.querySelector('img');
+      if (sourceImg) {
+        const freshImg = document.createElement('img');
+        freshImg.src = sourceImg.getAttribute('src');
+        freshImg.alt = sourceImg.getAttribute('alt') || '';
+        lightboxContent.innerHTML = '';
+        lightboxContent.appendChild(freshImg);
+      } else {
+        lightboxContent.innerHTML = sourceItem.innerHTML;
+      }
+    }
+    function switchLightbox(){
+      lightboxContent.style.opacity = '0';
+      setTimeout(() => {
+        renderLightbox();
+        const img = lightboxContent.querySelector('img');
+        if (img && !img.complete) {
+          img.addEventListener('load', () => { lightboxContent.style.opacity = '1'; }, { once: true });
+          img.addEventListener('error', () => { lightboxContent.style.opacity = '1'; }, { once: true });
+        } else {
+          lightboxContent.style.opacity = '1';
+        }
+      }, 180);
+    }
+    function openLightbox(i){
+      lightboxIndex = i;
+      renderLightbox();
+      lightbox.classList.add('show');
+    }
+    function closeLightbox(){
+      lightbox.classList.remove('show');
+    }
+    function showPrev(){
+      lightboxIndex = (lightboxIndex - 1 + total) % total;
+      switchLightbox();
+    }
+    function showNext(){
+      lightboxIndex = (lightboxIndex + 1) % total;
+      switchLightbox();
+    }
+
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox-prev').addEventListener('click', showPrev);
+    document.getElementById('lightbox-next').addEventListener('click', showNext);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('show')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+    });
+
+    galleryItems.forEach((item, i) => {
+      item.addEventListener('click', () => {
+        if (dragMoved) return; // ignore click right after a drag-scroll gesture
+        openLightbox(i);
+      });
+    });
+
+    // Mouse drag-to-scroll for desktop (touch swipe works natively on mobile)
+    let isDragging = false, dragStartX = 0, dragScrollLeft = 0, dragMoved = false;
+    galleryTrack.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse') return; // let touch use native swipe/tap, untouched
+      isDragging = true;
+      dragMoved = false;
+      galleryTrack.classList.add('dragging');
+      dragStartX = e.pageX;
+      dragScrollLeft = galleryTrack.scrollLeft;
+      galleryTrack.setPointerCapture(e.pointerId);
+    });
+    galleryTrack.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      if (Math.abs(e.pageX - dragStartX) > 6) dragMoved = true;
+      galleryTrack.scrollLeft = dragScrollLeft - (e.pageX - dragStartX);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt => {
+      galleryTrack.addEventListener(evt, () => {
+        isDragging = false;
+        galleryTrack.classList.remove('dragging');
+      });
+    });
+
+    window.addEventListener('load', updateActiveSlide);
+    setTimeout(updateActiveSlide, 300);
   }
 
-  // ẩn nút mũi tên khi chỉ có 1 ảnh
-  const hideNav = galleryImages.length <= 1;
-  if(lightboxPrev) lightboxPrev.hidden = hideNav;
-  if(lightboxNext) lightboxNext.hidden = hideNav;
-}
-
-document.querySelectorAll('.g-item').forEach((item, i)=>{
-  item.addEventListener('click', ()=>{
-    showLightboxImage(i, true);
-    lightbox.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  });
-});
-
-function closeLightbox(){
-  lightbox.classList.remove('open');
-  document.body.style.overflow = '';
-}
-if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-if(lightboxPrev) lightboxPrev.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex - 1); });
-if(lightboxNext) lightboxNext.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex + 1); });
-if(lightbox){
-  lightbox.addEventListener('click', (e)=>{
-    if(e.target === lightbox) closeLightbox(); // chạm ra ngoài ảnh để đóng
-  });
-}
-
-// vuốt trái/phải để chuyển ảnh (chạm ngón tay trên di động)
-let touchStartX = 0;
-let touchStartY = 0;
-if(lightbox){
-  lightbox.addEventListener('touchstart', (e)=>{
-    touchStartX = e.changedTouches[0].clientX;
-    touchStartY = e.changedTouches[0].clientY;
-  }, { passive: true });
-
-  lightbox.addEventListener('touchend', (e)=>{
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    const SWIPE_THRESHOLD = 45;
-    // chỉ tính là vuốt ngang nếu di chuyển ngang nhiều hơn dọc, tránh nhầm với cuộn trang
-    if(Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)){
-      if(dx < 0) showLightboxImage(currentImgIndex + 1); // vuốt sang trái -> ảnh sau
-      else showLightboxImage(currentImgIndex - 1);        // vuốt sang phải -> ảnh trước
-    }
-  }, { passive: true });
-}
-
-// hỗ trợ phím mũi tên trái/phải trên máy tính
-document.addEventListener('keydown', (e)=>{
-  if(!lightbox.classList.contains('open')) return;
-  if(e.key === 'ArrowRight') showLightboxImage(currentImgIndex + 1);
-  if(e.key === 'ArrowLeft') showLightboxImage(currentImgIndex - 1);
-  if(e.key === 'Escape') closeLightbox();
-});
-
-/* ---------- Hộp quà: chạm để mở, hiện QR ---------- */
-const qrModal = document.getElementById('qr-modal');
-const qrModalImg = document.getElementById('qr-modal-img');
-const qrModalName = document.getElementById('qr-modal-name');
-const qrModalBank = document.getElementById('qr-modal-bank');
-const qrModalStk = document.getElementById('qr-modal-stk');
-const qrModalHolder = document.getElementById('qr-modal-holder');
-const qrCopyBtn = document.getElementById('qr-copy-btn');
-const qrClose = document.getElementById('qr-close');
-const copyToast = document.getElementById('copy-toast');
-let toastTimer = null;
-let currentStk = '';
-
-function fallbackCopy(text, cb){
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.select();
-  try{ document.execCommand('copy'); cb(); }catch(e){}
-  document.body.removeChild(ta);
-}
-
-document.querySelectorAll('.gift-box').forEach(box=>{
-  box.addEventListener('click', ()=>{
-    box.classList.add('opening');
-
-    setTimeout(()=>{
-      qrModalName.textContent = box.dataset.name;
-      qrModalImg.src = box.dataset.qr;
-      qrModalBank.textContent = box.dataset.bank;
-      qrModalStk.textContent = box.dataset.stk;
-      qrModalHolder.textContent = box.dataset.holder;
-      currentStk = box.dataset.stk;
-      qrModal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }, 380);
-
-    setTimeout(()=> box.classList.remove('opening'), 900);
-  });
-});
-
-function closeQrModal(){
-  qrModal.classList.remove('open');
-  document.body.style.overflow = '';
-}
-if(qrClose) qrClose.addEventListener('click', closeQrModal);
-if(qrModal){
-  qrModal.addEventListener('click', (e)=>{
-    if(e.target === qrModal) closeQrModal();
-  });
-}
-
-if(qrCopyBtn){
-  qrCopyBtn.addEventListener('click', ()=>{
-    if(!currentStk) return;
-    const done = ()=>{
-      qrCopyBtn.textContent = 'Đã chép';
-      qrCopyBtn.classList.add('copied');
-      copyToast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=>{
-        copyToast.classList.remove('show');
-        qrCopyBtn.textContent = 'Sao chép';
-        qrCopyBtn.classList.remove('copied');
-      }, 1800);
-    };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(currentStk).then(done).catch(()=>fallbackCopy(currentStk, done));
-    } else {
-      fallbackCopy(currentStk, done);
-    }
-  });
-}
-
-/* ---------- Scroll reveal: chữ xuất hiện mượt khi vuốt xuống ---------- */
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-
-if(prefersReducedMotion){
-  revealEls.forEach(el => el.classList.add('revealed'));
-} else {
-  document.querySelectorAll('section').forEach(section=>{
-    const items = section.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
-    items.forEach((el, i)=>{
-      el.style.transitionDelay = Math.min(i * 0.1, 0.4) + 's';
-    });
-  });
-
-  const revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add('revealed');
-        revealObserver.unobserve(entry.target);
+  // ---------- Gift boxes: tap to open and reveal QR code ----------
+  document.querySelectorAll('.gift-box-wrap').forEach(box => {
+    box.addEventListener('click', () => {
+      box.classList.toggle('opened');
+      const hint = box.nextElementSibling;
+      if (hint && hint.classList.contains('gift-hint')) {
+        hint.textContent = box.classList.contains('opened')
+          ? 'Chạm để đóng hộp quà'
+          : 'Chạm để mở hộp quà';
       }
     });
-  }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
-
-  revealEls.forEach(el => revealObserver.observe(el));
-}
-
-
-/* ============================================================
-   PHẦN 2 — FIREBASE (RSVP / lời chúc / thả tim)
-   Toàn bộ được bọc try/catch: nếu chưa cấu hình Firebase hoặc
-   mất mạng, các phần này chỉ báo lỗi nhẹ chứ KHÔNG làm hỏng
-   giao diện hay khiến thiệp không mở được.
-   ============================================================ */
-let db = null;
-
-try{
-  // ⚠️ THAY CÁC GIÁ TRỊ DƯỚI ĐÂY BẰNG CONFIG FIREBASE CỦA BẠN
-  // (Lấy tại: Firebase Console > Project Settings > General > Your apps > SDK setup and configuration)
+  });
+  
+  
+  // ---------- Live wishes wall (Firebase) ----------
+  // Dán cấu hình Firebase của bạn vào đây (xem hướng dẫn trong HUONG-DAN-LOI-CHUC.md)
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
-	apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
-	authDomain: "wdbinhthao.firebaseapp.com",
-	databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
-	projectId: "wdbinhthao",
-	storageBucket: "wdbinhthao.firebasestorage.app",
-	messagingSenderId: "233769001209",
-	appId: "1:233769001209:web:e72aa4c53cef5545c68228",
-	measurementId: "G-HXEKMYH4SK"
+	apiKey: "AIzaSyB4F2ArqGvXkbZes2ByNi-Cm8rxlPurfsw",
+	authDomain: "mywedding-83971.firebaseapp.com",
+	databaseURL: "https://mywedding-83971-default-rtdb.asia-southeast1.firebasedatabase.app",
+	projectId: "mywedding-83971",
+	storageBucket: "mywedding-83971.firebasestorage.app",
+	messagingSenderId: "438823250851",
+	appId: "1:438823250851:web:b9215085ec1fbaea570816",
+	measurementId: "G-67J5YG0B3V"
   };
 
-  if(typeof firebase !== 'undefined'){
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-  } else {
-    console.warn('Firebase SDK chưa tải được — RSVP / lời chúc / thả tim sẽ tạm không hoạt động.');
-  }
-}catch(err){
-  console.error('Lỗi khởi tạo Firebase:', err);
-}
+  let wishesRef = null;
+  let wishesList = [];
+  let wishIndex = 0;
+  let wishAutoTimer = null;
 
-/* ---------- RSVP ---------- */
-const rsvpForm = document.getElementById('rsvp-form');
-if(rsvpForm){
+  const wishesListEl = document.getElementById('wishes-list');
+  const wishesPrevBtn = document.getElementById('wishes-prev');
+  const wishesNextBtn = document.getElementById('wishes-next');
+  const wishesCounterEl = document.getElementById('wishes-counter');
+
+  function renderWish(){
+    if (!wishesList.length) {
+      wishesListEl.innerHTML = '<p class="wishes-empty">Chưa có lời chúc nào — hãy là người đầu tiên!</p>';
+      wishesPrevBtn.style.display = 'none';
+      wishesNextBtn.style.display = 'none';
+      wishesCounterEl.textContent = '';
+      return;
+    }
+    const w = wishesList[wishIndex];
+    const name = w.name || 'Ẩn danh';
+    const initial = name.trim().charAt(0).toUpperCase();
+    wishesListEl.innerHTML = `
+      <div class="wish-card">
+        <div class="wish-avatar">${escapeHtml(initial)}</div>
+        <div class="wish-body">
+          <div class="wish-name">${escapeHtml(name)}</div>
+          <div class="wish-attend">${escapeHtml(w.attend || '')}</div>
+          ${w.note ? `<div class="wish-note">${escapeHtml(w.note)}</div>` : ''}
+        </div>
+      </div>
+    `;
+    requestAnimationFrame(() => {
+      const card = wishesListEl.querySelector('.wish-card');
+      if (card) card.classList.add('show');
+    });
+    const showNav = wishesList.length > 1;
+    wishesPrevBtn.style.display = showNav ? 'flex' : 'none';
+    wishesNextBtn.style.display = showNav ? 'flex' : 'none';
+    wishesCounterEl.textContent = `${wishIndex + 1} / ${wishesList.length}`;
+  }
+
+  function goToWish(i){
+    if (!wishesList.length) return;
+    wishIndex = (i + wishesList.length) % wishesList.length;
+    renderWish();
+  }
+
+  function restartAutoRotate(){
+    clearInterval(wishAutoTimer);
+    if (wishesList.length > 1) {
+      wishAutoTimer = setInterval(() => goToWish(wishIndex + 1), 5000);
+    }
+  }
+
+  wishesPrevBtn.addEventListener('click', () => { goToWish(wishIndex - 1); restartAutoRotate(); });
+  wishesNextBtn.addEventListener('click', () => { goToWish(wishIndex + 1); restartAutoRotate(); });
+
+  if (window.firebase && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebase.initializeApp(firebaseConfig);
+    wishesRef = firebase.database().ref('wishes');
+
+    wishesRef.orderByChild('time').on('value', snapshot => {
+      const data = snapshot.val();
+      wishesList = data ? Object.values(data).sort((a, b) => (b.time || 0) - (a.time || 0)) : [];
+      wishIndex = 0;
+      renderWish();
+      restartAutoRotate();
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---------- RSVP form ----------
+  const rsvpForm = document.getElementById('rsvp-form');
   rsvpForm.addEventListener('submit', function(e){
     e.preventDefault();
-    const name = document.getElementById('rsvp-name').value.trim();
-    const attend = document.querySelector('input[name="attend"]:checked').value;
-    const count = document.getElementById('rsvp-count').value;
-    if(!name) return;
+    const errorEl = document.getElementById('rsvp-error');
+    errorEl.style.display = 'none';
 
-    if(!db){
-      alert('Chưa kết nối được hệ thống, vui lòng thử lại sau.');
-      return;
+    const wishData = {
+      name: document.getElementById('rsvp-name').value,
+      attend: document.getElementById('rsvp-attend').value,
+      guests: document.getElementById('rsvp-guests').value,
+      note: document.getElementById('rsvp-note').value,
+      time: Date.now()
+    };
+
+    function showSuccess(){
+      rsvpForm.style.display = 'none';
+      document.getElementById('rsvp-msg').style.display = 'block';
     }
 
-    db.ref('rsvp').push({
-      name, attend, count,
-      createdAt: firebase.database.ServerValue.TIMESTAMP
-    }).then(()=>{
-      document.getElementById('rsvp-thanks').style.display = 'block';
-      rsvpForm.reset();
-    }).catch(err=>{
-      alert('Có lỗi khi gửi, vui lòng thử lại.');
-      console.error(err);
-    });
-  });
-}
+    // Gửi email thông báo qua Formspree — chỉ là kênh phụ để bạn nhận email,
+    // lỗi ở đây (ví dụ chưa dán link Formspree thật) sẽ KHÔNG báo cho khách,
+    // vì lời chúc vẫn được lưu và hiển thị lên web bình thường.
+    fetch(rsvpForm.action, {
+      method: 'POST',
+      body: new FormData(rsvpForm),
+      headers: { 'Accept': 'application/json' }
+    }).catch(() => {});
 
-// highlight radio selection style
-document.querySelectorAll('#rsvp-attend-row label').forEach(l=>{
-  l.addEventListener('click', ()=>{
-    document.querySelectorAll('#rsvp-attend-row label').forEach(x=>x.classList.remove('active'));
-    l.classList.add('active');
-  });
-});
-
-/* ---------- Wishes ---------- */
-const wishList = document.getElementById('wish-list');
-
-function renderWish(key, data){
-  const el = document.createElement('div');
-  el.className = 'wish-card';
-  el.id = 'wish-' + key;
-  const time = data.createdAt ? new Date(data.createdAt).toLocaleString('vi-VN') : '';
-  el.innerHTML = `<div class="wname"></div><div class="wtext"></div><div class="wtime"></div>`;
-  el.querySelector('.wname').textContent = data.name || 'Ẩn danh';
-  el.querySelector('.wtext').textContent = data.text || '';
-  el.querySelector('.wtime').textContent = time;
-  wishList.prepend(el);
-}
-
-if(db){
-  try{
-    db.ref('wishes').limitToLast(100).on('child_added', snap=>{
-      renderWish(snap.key, snap.val());
-    });
-    db.ref('wishes').on('child_removed', snap=>{
-      const el = document.getElementById('wish-' + snap.key);
-      if(el) el.remove();
-    });
-  }catch(err){
-    console.error('Lỗi tải lời chúc:', err);
-  }
-}
-
-const wishSend = document.getElementById('wish-send');
-if(wishSend){
-  wishSend.addEventListener('click', ()=>{
-    const name = document.getElementById('wish-name').value.trim() || 'Ẩn danh';
-    const text = document.getElementById('wish-text').value.trim();
-    if(!text) return;
-
-    if(!db){
-      alert('Chưa kết nối được hệ thống, vui lòng thử lại sau.');
-      return;
+    if (wishesRef) {
+      // Có Firebase: đây là kênh chính quyết định thành công/thất bại
+      wishesRef.push(wishData)
+        .then(showSuccess)
+        .catch(() => { errorEl.style.display = 'block'; });
+    } else {
+      // Chưa cấu hình Firebase: vẫn báo thành công để không chặn khách
+      showSuccess();
     }
-
-    db.ref('wishes').push({
-      name, text,
-      createdAt: firebase.database.ServerValue.TIMESTAMP
-    }).then(()=>{
-      document.getElementById('wish-text').value = '';
-    }).catch(err=>{
-      alert('Không gửi được lời chúc, vui lòng thử lại.');
-      console.error(err);
-    });
   });
-}
-
-/* ---------- Heart / like counter (realtime, shared) ---------- */
-const heartBtn = document.getElementById('heart-fab');
-if(heartBtn){
-  heartBtn.addEventListener('click', ()=>{
-    if(db){
-      try{ db.ref('likes').transaction(v => (v || 0) + 1); }catch(err){ console.error(err); }
-    }
-    spawnFloatingHeart();
-  });
-}
-
-function spawnFloatingHeart(){
-  const h = document.createElement('div');
-  h.className = 'float-heart';
-  h.textContent = '❤';
-  const rect = heartBtn.getBoundingClientRect();
-  h.style.left = (rect.left + 14) + 'px';
-  h.style.top = (rect.top) + 'px';
-  document.body.appendChild(h);
-  setTimeout(()=>h.remove(), 1600);
-}
