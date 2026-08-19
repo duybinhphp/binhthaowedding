@@ -18,7 +18,9 @@ function openInvitation(){
   envelope.classList.add('open');
 
   if(audio && audio.getAttribute('src')){
-    audio.play().then(()=> musicBtn.classList.add('spin')).catch(()=>{});
+    audio.play()
+      .then(()=> musicBtn.classList.add('spin'))
+      .catch(err=> console.warn('Nhạc nền không tự phát được (thường do trình duyệt chặn autoplay hoặc sai đường dẫn file):', err));
   }
 
   // 2. sau khi animation chạy xong, fade toàn bộ cover ra
@@ -37,8 +39,9 @@ if(musicBtn){
     e.stopPropagation();
     if(!audio || !audio.getAttribute('src')) return;
     if(audio.paused){
-      audio.play();
-      musicBtn.classList.add('spin');
+      audio.play()
+        .then(()=> musicBtn.classList.add('spin'))
+        .catch(err=> console.warn('Không phát được nhạc:', err));
     } else {
       audio.pause();
       musicBtn.classList.remove('spin');
@@ -48,7 +51,7 @@ if(musicBtn){
 
 /* ---------- Đếm ngược ---------- */
 // Countdown — đặt đúng ngày giờ cưới tại đây
-const weddingDate = new Date('2026-10-25T10:00:00+07:00').getTime();
+const weddingDate = new Date('2026-12-30T09:00:00+07:00').getTime();
 
 function updateCountdown(){
   const now = Date.now();
@@ -70,15 +73,43 @@ function updateCountdown(){
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---------- Lightbox: chạm ảnh để xem toàn màn hình ---------- */
+/* ---------- Lightbox: chạm ảnh để xem toàn màn hình + vuốt chuyển ảnh ---------- */
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const lightboxClose = document.getElementById('lightbox-close');
+const lightboxPrev = document.getElementById('lightbox-prev');
+const lightboxNext = document.getElementById('lightbox-next');
+const lightboxCounter = document.getElementById('lightbox-counter');
 
-document.querySelectorAll('.g-item').forEach(item=>{
+const galleryImages = Array.from(document.querySelectorAll('.g-item')).map(item => item.getAttribute('data-full'));
+let currentImgIndex = 0;
+
+function showLightboxImage(index, instant){
+  if(galleryImages.length === 0) return;
+  currentImgIndex = (index + galleryImages.length) % galleryImages.length;
+
+  const render = ()=>{
+    lightboxImg.src = galleryImages[currentImgIndex];
+    lightboxImg.classList.remove('switching');
+    if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
+  };
+
+  if(instant){
+    render();
+  } else {
+    lightboxImg.classList.add('switching');
+    setTimeout(render, 150);
+  }
+
+  // ẩn nút mũi tên khi chỉ có 1 ảnh
+  const hideNav = galleryImages.length <= 1;
+  if(lightboxPrev) lightboxPrev.hidden = hideNav;
+  if(lightboxNext) lightboxNext.hidden = hideNav;
+}
+
+document.querySelectorAll('.g-item').forEach((item, i)=>{
   item.addEventListener('click', ()=>{
-    const full = item.getAttribute('data-full');
-    lightboxImg.src = full;
+    showLightboxImage(i, true);
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
   });
@@ -89,11 +120,42 @@ function closeLightbox(){
   document.body.style.overflow = '';
 }
 if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+if(lightboxPrev) lightboxPrev.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex - 1); });
+if(lightboxNext) lightboxNext.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex + 1); });
 if(lightbox){
   lightbox.addEventListener('click', (e)=>{
     if(e.target === lightbox) closeLightbox(); // chạm ra ngoài ảnh để đóng
   });
 }
+
+// vuốt trái/phải để chuyển ảnh (chạm ngón tay trên di động)
+let touchStartX = 0;
+let touchStartY = 0;
+if(lightbox){
+  lightbox.addEventListener('touchstart', (e)=>{
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  lightbox.addEventListener('touchend', (e)=>{
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const SWIPE_THRESHOLD = 45;
+    // chỉ tính là vuốt ngang nếu di chuyển ngang nhiều hơn dọc, tránh nhầm với cuộn trang
+    if(Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)){
+      if(dx < 0) showLightboxImage(currentImgIndex + 1); // vuốt sang trái -> ảnh sau
+      else showLightboxImage(currentImgIndex - 1);        // vuốt sang phải -> ảnh trước
+    }
+  }, { passive: true });
+}
+
+// hỗ trợ phím mũi tên trái/phải trên máy tính
+document.addEventListener('keydown', (e)=>{
+  if(!lightbox.classList.contains('open')) return;
+  if(e.key === 'ArrowRight') showLightboxImage(currentImgIndex + 1);
+  if(e.key === 'ArrowLeft') showLightboxImage(currentImgIndex - 1);
+  if(e.key === 'Escape') closeLightbox();
+});
 
 /* ---------- Hộp quà: chạm để mở, hiện QR ---------- */
 const qrModal = document.getElementById('qr-modal');
@@ -210,7 +272,7 @@ try{
   // ⚠️ THAY CÁC GIÁ TRỊ DƯỚI ĐÂY BẰNG CONFIG FIREBASE CỦA BẠN
   // (Lấy tại: Firebase Console > Project Settings > General > Your apps > SDK setup and configuration)
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+  const firebaseConfig = {
 	apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
 	authDomain: "wdbinhthao.firebaseapp.com",
 	databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
