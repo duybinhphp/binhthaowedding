@@ -40,11 +40,11 @@ h1,h2,h3, .script{font-family:'Playfair Display', serif;}
 }
 #cover.hide{opacity:0; pointer-events:none;}
  
-.lux-envelope{ width:370px; }
+.lux-envelope{ width:340px; }
  
 .lux-frame{
   position:relative;
-  width:100%; min-height:460px;
+  width:100%; min-height:440px;
   background:linear-gradient(165deg,#ffffff,#fbf5e9);
   border:1px solid rgba(201,163,101,.4);
   border-radius:6px;
