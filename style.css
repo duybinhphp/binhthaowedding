@@ -216,7 +216,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .persons-names{
   margin-top:24px; display:flex; align-items:center; justify-content:center; gap:14px;
 }
-.persons-names .pname{ font-family:'Playfair Display',serif; font-size:21px; color:var(--ink); }
+.persons-names .pname{ font-family:'Great Vibes',serif; font-size:28px; color:var(--ink); }
 .persons-names .bouquet{
   flex-shrink:0; width:36px; height:36px; object-fit:contain;
   filter:drop-shadow(0 4px 8px rgba(80,60,30,.25));
