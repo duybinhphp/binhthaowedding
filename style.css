@@ -166,11 +166,11 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 #hero .fam p{ line-height:1.6; }
 
 /* ---------- Countdown ---------- */
-#countdown{ background:var(--ink); color:var(--cream); }
-#countdown .eyebrow{ color:var(--gold-light); }
-#countdown .title{ font-size:26px; margin:10px 0 30px; color:#fff; }
+#countdown{ background:var(--cream-dark)}
+#countdown .eyebrow{ color:var(--gold); }
+#countdown .title{ font-size:26px; margin:10px 0 30px; color:var(--gold); }
 .cd-grid{ display:flex; justify-content:center; gap:14px; }
-.cd-item{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.2); border-radius:10px; padding:14px 10px; min-width:64px; }
+.cd-item{ background:rgba(255,255,255,.06); border:1px solid rgba(0,0,0,1); border-radius:10px; padding:14px 10px; min-width:64px; }
 .cd-item .num{ font-size:28px; font-weight:600; font-family:'Playfair Display',serif; }
 .cd-item .lbl{ font-size:11px; letter-spacing:1px; text-transform:uppercase; opacity:.8; margin-top:4px; }
 
@@ -203,15 +203,24 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 #story{ background:var(--cream-dark); }
 #story .quote{ font-family:'Great Vibes',cursive; font-size:32px; color:var(--gold); margin-bottom:10px;}
 #story p{ font-size:17px; line-height:1.8; max-width:360px; margin:14px auto; color:#5a5145;}
-.persons{ display:flex; justify-content:space-around; margin-top:36px; }
-.persons .p{ width:150px; }
+ 
+.persons{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:36px; }
+.persons .p{ width:128px; flex-shrink:0; }
 .persons .avatar{
-  width:140px; height:300px; border-radius:0%; overflow:hidden;
-  background:linear-gradient(145deg,var(--pink),var(--gold-light)); margin:0 auto 12px;
+  width:100%; aspect-ratio:3/4; border-radius:18px; overflow:hidden;
+  background:linear-gradient(145deg,var(--pink),var(--gold-light));
+  box-shadow:0 12px 26px -14px rgba(80,60,30,.35);
 }
 .persons .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
-.persons .role{ font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); }
-.persons .name{ font-size:24px; margin-top:4px; }
+ 
+.persons-names{
+  margin-top:24px; display:flex; align-items:center; justify-content:center; gap:14px;
+}
+.persons-names .pname{ font-family:'Playfair Display',serif; font-size:21px; color:var(--ink); }
+.persons-names .bouquet{
+  flex-shrink:0; width:36px; height:36px; object-fit:contain;
+  filter:drop-shadow(0 4px 8px rgba(80,60,30,.25));
+}
 
 /* ---------- Timeline ---------- */
 #timeline .tl-item{ display:flex; align-items:center; gap:16px; max-width:320px; margin:0 auto 22px; text-align:left; }
