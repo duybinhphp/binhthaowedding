@@ -141,10 +141,15 @@
   </section>
 
   <!-- LIGHTBOX xem ảnh toàn màn hình -->
-  <div id="lightbox" class="lightbox">
-    <button id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
-    <img id="lightbox-img" src="" alt="Xem ảnh toàn màn hình" draggable="false">
+  <<div id="lightbox" class="lightbox">
+  <button id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
+  <button id="lightbox-prev" class="lightbox-nav prev" aria-label="Ảnh trước">‹</button>
+  <div class="lightbox-viewport" id="lightbox-viewport">
+    <div class="lightbox-track" id="lightbox-track"></div>
   </div>
+  <button id="lightbox-next" class="lightbox-nav next" aria-label="Ảnh sau">›</button>
+  <div id="lightbox-counter" class="lightbox-counter"></div>
+</div>
 
   <!-- RSVP -->
   <section id="rsvp">

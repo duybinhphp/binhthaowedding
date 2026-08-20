@@ -75,38 +75,52 @@ setInterval(updateCountdown, 1000);
 
 /* ---------- Lightbox: chạm ảnh để xem toàn màn hình + vuốt chuyển ảnh ---------- */
 const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
+const lightboxViewport = document.getElementById('lightbox-viewport');
+const lightboxTrack = document.getElementById('lightbox-track');
 const lightboxClose = document.getElementById('lightbox-close');
 const lightboxPrev = document.getElementById('lightbox-prev');
 const lightboxNext = document.getElementById('lightbox-next');
 const lightboxCounter = document.getElementById('lightbox-counter');
-
+ 
 const galleryImages = Array.from(document.querySelectorAll('.g-item')).map(item => item.getAttribute('data-full'));
 let currentImgIndex = 0;
-
+ 
+// dựng sẵn dải ảnh (mỗi ảnh 1 slide) một lần duy nhất khi tải trang
+if(lightboxTrack){
+  galleryImages.forEach((src, i)=>{
+    const slide = document.createElement('div');
+    slide.className = 'lightbox-slide';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Ảnh cưới ' + (i + 1);
+    img.draggable = false;
+    img.loading = 'lazy';
+    slide.appendChild(img);
+    lightboxTrack.appendChild(slide);
+  });
+}
+ 
 function showLightboxImage(index, instant){
   if(galleryImages.length === 0) return;
   currentImgIndex = (index + galleryImages.length) % galleryImages.length;
-
-  const render = ()=>{
-    lightboxImg.src = galleryImages[currentImgIndex];
-    lightboxImg.classList.remove('switching');
-    if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
-  };
-
+ 
   if(instant){
-    render();
+    lightboxTrack.style.transition = 'none';
+    lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
+    // ép trình duyệt áp dụng ngay rồi mới bật lại transition cho các lần chuyển sau
+    void lightboxTrack.offsetHeight;
+    lightboxTrack.style.transition = '';
   } else {
-    lightboxImg.classList.add('switching');
-    setTimeout(render, 150);
+    lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
   }
-
-  // ẩn nút mũi tên khi chỉ có 1 ảnh
+ 
+  if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
+ 
   const hideNav = galleryImages.length <= 1;
   if(lightboxPrev) lightboxPrev.hidden = hideNav;
   if(lightboxNext) lightboxNext.hidden = hideNav;
 }
-
+ 
 document.querySelectorAll('.g-item').forEach((item, i)=>{
   item.addEventListener('click', ()=>{
     showLightboxImage(i, true);
@@ -114,7 +128,7 @@ document.querySelectorAll('.g-item').forEach((item, i)=>{
     document.body.style.overflow = 'hidden';
   });
 });
-
+ 
 function closeLightbox(){
   lightbox.classList.remove('open');
   document.body.style.overflow = '';
@@ -124,35 +138,71 @@ if(lightboxPrev) lightboxPrev.addEventListener('click', (e)=>{ e.stopPropagation
 if(lightboxNext) lightboxNext.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex + 1); });
 if(lightbox){
   lightbox.addEventListener('click', (e)=>{
-    if(e.target === lightbox) closeLightbox(); // chạm ra ngoài ảnh để đóng
+    if(e.target === lightbox || e.target === lightboxViewport) closeLightbox(); // chạm ra ngoài ảnh để đóng
   });
 }
-
-// vuốt trái/phải để chuyển ảnh (chạm ngón tay trên di động)
+ 
+// vuốt trái/phải để chuyển ảnh — track trượt theo ngón tay trong lúc vuốt, không chỉ đổi ảnh đột ngột
 let touchStartX = 0;
 let touchStartY = 0;
-if(lightbox){
-  lightbox.addEventListener('touchstart', (e)=>{
+let isSwiping = false;
+let swipeIntentDecided = false;
+let swipeIsHorizontal = false;
+ 
+if(lightboxViewport){
+  lightboxViewport.addEventListener('touchstart', (e)=>{
     touchStartX = e.changedTouches[0].clientX;
     touchStartY = e.changedTouches[0].clientY;
+    isSwiping = true;
+    swipeIntentDecided = false;
+    swipeIsHorizontal = false;
+    lightboxTrack.style.transition = 'none';
   }, { passive: true });
-
-  // chặn cử chỉ mặc định (kéo ảnh, cuộn/zoom trang) trong lúc vuốt trong lightbox
-  lightbox.addEventListener('touchmove', (e)=>{
-    e.preventDefault();
-  }, { passive: false });
-
-  lightbox.addEventListener('touchend', (e)=>{
+ 
+  lightboxViewport.addEventListener('touchmove', (e)=>{
+    if(!isSwiping) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
-    const SWIPE_THRESHOLD = 45;
-    if(Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)){
-      if(dx < 0) showLightboxImage(currentImgIndex + 1);
-      else showLightboxImage(currentImgIndex - 1);
+ 
+    if(!swipeIntentDecided){
+      // chỉ quyết định 1 lần: vuốt ngang (đổi ảnh) hay vuốt dọc (cuộn trang)
+      if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
+        swipeIsHorizontal = Math.abs(dx) > Math.abs(dy);
+        swipeIntentDecided = true;
+      }
+    }
+ 
+    if(swipeIsHorizontal){
+      e.preventDefault(); // chặn cuộn trang khi đang vuốt ngang đổi ảnh
+      const viewportWidth = lightboxViewport.clientWidth || 1;
+      const dragPercent = (dx / viewportWidth) * 100;
+      lightboxTrack.style.transform = 'translateX(calc(-' + (currentImgIndex * 100) + '% + ' + dragPercent + '%))';
+    }
+  }, { passive: false });
+ 
+  lightboxViewport.addEventListener('touchend', (e)=>{
+    if(!isSwiping) return;
+    isSwiping = false;
+    lightboxTrack.style.transition = '';
+ 
+    if(!swipeIsHorizontal){
+      showLightboxImage(currentImgIndex); // không phải vuốt ngang -> giữ nguyên ảnh hiện tại
+      return;
+    }
+ 
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const viewportWidth = lightboxViewport.clientWidth || 1;
+    const SWIPE_RATIO = 0.18; // vuốt qua ~18% chiều rộng khung là đủ để chuyển ảnh
+ 
+    if(Math.abs(dx) / viewportWidth > SWIPE_RATIO){
+      if(dx < 0) showLightboxImage(currentImgIndex + 1); // vuốt sang trái -> ảnh sau
+      else showLightboxImage(currentImgIndex - 1);        // vuốt sang phải -> ảnh trước
+    } else {
+      showLightboxImage(currentImgIndex); // vuốt chưa đủ xa -> bật lại đúng ảnh hiện tại
     }
   }, { passive: true });
 }
-
+ 
 // hỗ trợ phím mũi tên trái/phải trên máy tính
 document.addEventListener('keydown', (e)=>{
   if(!lightbox.classList.contains('open')) return;
