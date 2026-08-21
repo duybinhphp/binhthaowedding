@@ -105,7 +105,9 @@ h1,h2,h3, .script{font-family:'Playfair Display', serif;}
   font-size:20px; line-height:1.3; margin-top:15px; letter-spacing:2px; color:var(--ink);
 }
 .lux-monogram span{ font-family:'Great Vibes',cursive; font-size:30px; color:var(--gold); margin:0; }
-.lux-names{ font-family:'Great Vibes',cursive; font-size:26px; line-height:1.5; margin-top:14px; color:var(--ink); }
+.lux-names1{ font-family:'Great Vibes',cursive; font-size:40px; line-height:1.5; margin-top:10px; margin-bottom: 5px color:var(--ink); }
+.lux-names2{ font-family:'Great Vibes',cursive; font-size:25px; line-height:1; margin-top:10px; color:var(--gold); }
+.lux-names3{ font-family:'Great Vibes',cursive; font-size:40px; line-height:1; margin-top:5px; color:var(--ink); }
 .lux-divider{ width:46px; height:1px; background:var(--gold); margin:20px auto; opacity:.6; }
 .lux-date{ font-size:18px; letter-spacing:4px; color:var(--gold); }
  
