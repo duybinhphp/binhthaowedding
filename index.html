@@ -34,6 +34,8 @@
         <span class="lux-corner bl"></span>
         <span class="lux-corner br"></span>
  
+        <div class="lux-watermark">H&amp;Y</div>
+ 
         <div class="lux-content">
           <div class="lux-eyebrow">Wedding Invitation</div>
           <div class="lux-monogram">B<span>&amp;</span>T</div>
@@ -53,9 +55,21 @@
     </div>
     <div class="tap-hint">Chạm vào con dấu để mở thiệp</div>
   </div>
-
+ 
   <button id="music-btn" aria-label="Bật/tắt nhạc">🎵</button>
- <audio id="bg-audio" loop src="nhacnen.mp3"></audio>
+  <audio id="bg-audio" loop src="nhacnen.mp3"></audio>
+ 
+  <!-- OPENING PHOTO : ảnh mở đầu thiệp -->
+  <section id="opening-photo">
+    <div class="opening-photo-frame">
+      <img src="images/ab19.jpg" alt="Duy Bình & Hồng Thảo" loading="eager">
+      <div class="opening-overlay"></div>
+      <div class="opening-caption" id="opening-caption">
+        <span class="opening-line"></span>
+        <span class="opening-caption-text">Preserve the moment 25 . 10 . 2026 </span>
+      </div>
+    </div>
+  </section>
   <!-- HERO -->
   <section id="hero">
     <div class="save reveal">Save Our Date</div>
@@ -136,13 +150,13 @@
   <!-- LIGHTBOX xem ảnh toàn màn hình -->
   <<div id="lightbox" class="lightbox">
   <button id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
-  <button id="lightbox-prev" class="lightbox-nav prev" aria-label="Ảnh trước">‹</button>
+ <button id="lightbox-prev" class="lightbox-nav prev" aria-label="Ảnh trước" hidden>‹</button>
   <div class="lightbox-viewport" id="lightbox-viewport">
     <div class="lightbox-track" id="lightbox-track"></div>
   </div>
-  <button id="lightbox-next" class="lightbox-nav next" aria-label="Ảnh sau">›</button>
+  <button id="lightbox-next" class="lightbox-nav next" aria-label="Ảnh sau" hidden>›</button>
   <div id="lightbox-counter" class="lightbox-counter"></div>
-</div>
+  </div>
 
   <!-- COUNTDOWN -->
   <section id="countdown">

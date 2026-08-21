@@ -8,6 +8,7 @@ const envelope = document.getElementById('envelope');
 const waxSeal = document.getElementById('wax-seal');
 const audio = document.getElementById('bg-audio');
 const musicBtn = document.getElementById('music-btn');
+const openingCaption = document.getElementById('opening-caption');
 let coverOpened = false;
 
 function openInvitation(){
@@ -27,6 +28,9 @@ function openInvitation(){
   setTimeout(()=>{
     cover.classList.add('hide');
     setTimeout(()=> cover.style.display='none', 700);
+
+    // 3. ngay khi cover vừa mờ đi, cho chữ "Preserve the moment" xuất hiện động
+    if(openingCaption) openingCaption.classList.add('show');
   }, 750);
 }
 
@@ -73,7 +77,7 @@ function updateCountdown(){
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---------- Lightbox: chạm ảnh để xem toàn màn hình + vuốt chuyển ảnh ---------- */
+/* ---------- Lightbox: xem ảnh toàn màn hình, vuốt trượt ngang thật (track carousel) ---------- */
 const lightbox = document.getElementById('lightbox');
 const lightboxViewport = document.getElementById('lightbox-viewport');
 const lightboxTrack = document.getElementById('lightbox-track');
@@ -81,10 +85,10 @@ const lightboxClose = document.getElementById('lightbox-close');
 const lightboxPrev = document.getElementById('lightbox-prev');
 const lightboxNext = document.getElementById('lightbox-next');
 const lightboxCounter = document.getElementById('lightbox-counter');
- 
+
 const galleryImages = Array.from(document.querySelectorAll('.g-item')).map(item => item.getAttribute('data-full'));
 let currentImgIndex = 0;
- 
+
 // dựng sẵn dải ảnh (mỗi ảnh 1 slide) một lần duy nhất khi tải trang
 if(lightboxTrack){
   galleryImages.forEach((src, i)=>{
@@ -99,11 +103,11 @@ if(lightboxTrack){
     lightboxTrack.appendChild(slide);
   });
 }
- 
+
 function showLightboxImage(index, instant){
   if(galleryImages.length === 0) return;
   currentImgIndex = (index + galleryImages.length) % galleryImages.length;
- 
+
   if(instant){
     lightboxTrack.style.transition = 'none';
     lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
@@ -113,14 +117,14 @@ function showLightboxImage(index, instant){
   } else {
     lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
   }
- 
+
   if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
- 
+
   const hideNav = galleryImages.length <= 1;
   if(lightboxPrev) lightboxPrev.hidden = hideNav;
   if(lightboxNext) lightboxNext.hidden = hideNav;
 }
- 
+
 document.querySelectorAll('.g-item').forEach((item, i)=>{
   item.addEventListener('click', ()=>{
     showLightboxImage(i, true);
@@ -128,7 +132,7 @@ document.querySelectorAll('.g-item').forEach((item, i)=>{
     document.body.style.overflow = 'hidden';
   });
 });
- 
+
 function closeLightbox(){
   lightbox.classList.remove('open');
   document.body.style.overflow = '';
@@ -141,14 +145,14 @@ if(lightbox){
     if(e.target === lightbox || e.target === lightboxViewport) closeLightbox(); // chạm ra ngoài ảnh để đóng
   });
 }
- 
+
 // vuốt trái/phải để chuyển ảnh — track trượt theo ngón tay trong lúc vuốt, không chỉ đổi ảnh đột ngột
 let touchStartX = 0;
 let touchStartY = 0;
 let isSwiping = false;
 let swipeIntentDecided = false;
 let swipeIsHorizontal = false;
- 
+
 if(lightboxViewport){
   lightboxViewport.addEventListener('touchstart', (e)=>{
     touchStartX = e.changedTouches[0].clientX;
@@ -158,12 +162,12 @@ if(lightboxViewport){
     swipeIsHorizontal = false;
     lightboxTrack.style.transition = 'none';
   }, { passive: true });
- 
+
   lightboxViewport.addEventListener('touchmove', (e)=>{
     if(!isSwiping) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
- 
+
     if(!swipeIntentDecided){
       // chỉ quyết định 1 lần: vuốt ngang (đổi ảnh) hay vuốt dọc (cuộn trang)
       if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
@@ -171,7 +175,7 @@ if(lightboxViewport){
         swipeIntentDecided = true;
       }
     }
- 
+
     if(swipeIsHorizontal){
       e.preventDefault(); // chặn cuộn trang khi đang vuốt ngang đổi ảnh
       const viewportWidth = lightboxViewport.clientWidth || 1;
@@ -179,21 +183,21 @@ if(lightboxViewport){
       lightboxTrack.style.transform = 'translateX(calc(-' + (currentImgIndex * 100) + '% + ' + dragPercent + '%))';
     }
   }, { passive: false });
- 
+
   lightboxViewport.addEventListener('touchend', (e)=>{
     if(!isSwiping) return;
     isSwiping = false;
     lightboxTrack.style.transition = '';
- 
+
     if(!swipeIsHorizontal){
       showLightboxImage(currentImgIndex); // không phải vuốt ngang -> giữ nguyên ảnh hiện tại
       return;
     }
- 
+
     const dx = e.changedTouches[0].clientX - touchStartX;
     const viewportWidth = lightboxViewport.clientWidth || 1;
     const SWIPE_RATIO = 0.18; // vuốt qua ~18% chiều rộng khung là đủ để chuyển ảnh
- 
+
     if(Math.abs(dx) / viewportWidth > SWIPE_RATIO){
       if(dx < 0) showLightboxImage(currentImgIndex + 1); // vuốt sang trái -> ảnh sau
       else showLightboxImage(currentImgIndex - 1);        // vuốt sang phải -> ảnh trước
@@ -202,7 +206,7 @@ if(lightboxViewport){
     }
   }, { passive: true });
 }
- 
+
 // hỗ trợ phím mũi tên trái/phải trên máy tính
 document.addEventListener('keydown', (e)=>{
   if(!lightbox.classList.contains('open')) return;
@@ -326,16 +330,16 @@ try{
   // ⚠️ THAY CÁC GIÁ TRỊ DƯỚI ĐÂY BẰNG CONFIG FIREBASE CỦA BẠN
   // (Lấy tại: Firebase Console > Project Settings > General > Your apps > SDK setup and configuration)
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-	apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
-	authDomain: "wdbinhthao.firebaseapp.com",
-	databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
-	projectId: "wdbinhthao",
-	storageBucket: "wdbinhthao.firebasestorage.app",
-	messagingSenderId: "233769001209",
-	appId: "1:233769001209:web:e72aa4c53cef5545c68228",
-	measurementId: "G-HXEKMYH4SK"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
+  authDomain: "wdbinhthao.firebaseapp.com",
+  databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wdbinhthao",
+  storageBucket: "wdbinhthao.firebasestorage.app",
+  messagingSenderId: "233769001209",
+  appId: "1:233769001209:web:e72aa4c53cef5545c68228",
+  measurementId: "G-HXEKMYH4SK"
+};
 
   if(typeof firebase !== 'undefined'){
     firebase.initializeApp(firebaseConfig);
