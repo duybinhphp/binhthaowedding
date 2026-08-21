@@ -87,42 +87,92 @@ const lightboxNext = document.getElementById('lightbox-next');
 const lightboxCounter = document.getElementById('lightbox-counter');
 
 const galleryImages = Array.from(document.querySelectorAll('.g-item')).map(item => item.getAttribute('data-full'));
-let currentImgIndex = 0;
+let currentImgIndex = 0;   // chỉ số ảnh THẬT (0..N-1) — dùng để hiển thị số đếm, ẩn/hiện nút, v.v.
+let trackPosition = 1;     // vị trí trong dải ảnh MỞ RỘNG (có thêm 2 ảnh nhân bản ở 2 đầu để vòng lặp mượt)
+const TRANSITION_MS = 320; // khớp với thời gian transition CSS của .lightbox-track (.3s) + chút dự phòng
 
-// dựng sẵn dải ảnh (mỗi ảnh 1 slide) một lần duy nhất khi tải trang
-if(lightboxTrack){
-  galleryImages.forEach((src, i)=>{
-    const slide = document.createElement('div');
-    slide.className = 'lightbox-slide';
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Ảnh cưới ' + (i + 1);
-    img.draggable = false;
-    img.loading = 'lazy';
-    slide.appendChild(img);
-    lightboxTrack.appendChild(slide);
-  });
+// dựng sẵn dải ảnh một lần duy nhất khi tải trang — nhân bản thêm ảnh cuối ở đầu và ảnh đầu ở cuối
+// để khi vuốt/chuyển vòng qua ranh giới, track chỉ cần trượt đúng 1 bước, không phải "bay" ngược qua
+// toàn bộ N ảnh ở giữa (đó là nguyên nhân gây giật khi chuyển từ ảnh cuối về ảnh đầu).
+function buildSlide(src, i){
+  const slide = document.createElement('div');
+  slide.className = 'lightbox-slide';
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Ảnh cưới ' + (i + 1);
+  img.draggable = false;
+  img.loading = 'lazy';
+  slide.appendChild(img);
+  return slide;
 }
 
-function showLightboxImage(index, instant){
-  if(galleryImages.length === 0) return;
-  currentImgIndex = (index + galleryImages.length) % galleryImages.length;
+if(lightboxTrack && galleryImages.length > 0){
+  const N = galleryImages.length;
+  if(N > 1) lightboxTrack.appendChild(buildSlide(galleryImages[N - 1], N - 1)); // clone ảnh cuối, đặt ở đầu
+  galleryImages.forEach((src, i)=> lightboxTrack.appendChild(buildSlide(src, i)));
+  if(N > 1) lightboxTrack.appendChild(buildSlide(galleryImages[0], 0));         // clone ảnh đầu, đặt ở cuối
+}
 
+function setTrackTransform(pos, instant){
   if(instant){
     lightboxTrack.style.transition = 'none';
-    lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
+    lightboxTrack.style.transform = 'translateX(-' + (pos * 100) + '%)';
     // ép trình duyệt áp dụng ngay rồi mới bật lại transition cho các lần chuyển sau
     void lightboxTrack.offsetHeight;
     lightboxTrack.style.transition = '';
   } else {
-    lightboxTrack.style.transform = 'translateX(-' + (currentImgIndex * 100) + '%)';
+    lightboxTrack.style.transform = 'translateX(-' + (pos * 100) + '%)';
   }
+}
 
+function updateLightboxUI(){
   if(lightboxCounter) lightboxCounter.textContent = (currentImgIndex + 1) + ' / ' + galleryImages.length;
-
   const hideNav = galleryImages.length <= 1;
   if(lightboxPrev) lightboxPrev.hidden = hideNav;
   if(lightboxNext) lightboxNext.hidden = hideNav;
+}
+
+// nhảy trực tiếp tới đúng ảnh (mở lightbox từ 1 ảnh cụ thể) — luôn tức thời, không cần hiệu ứng vòng lặp
+function showLightboxImage(index, instant){
+  if(galleryImages.length === 0) return;
+  currentImgIndex = (index + galleryImages.length) % galleryImages.length;
+  trackPosition = currentImgIndex + 1; // +1 vì slide đầu tiên trong track mở rộng là ảnh clone
+  setTrackTransform(trackPosition, instant);
+  updateLightboxUI();
+}
+
+// chuyển sang ảnh kế tiếp — luôn trượt đúng 1 bước về phía trước, kể cả khi đang ở ảnh cuối cùng
+// (lúc đó sẽ trượt êm vào slide clone, rồi mới lặng lẽ "dịch chuyển tức thời" về đúng ảnh đầu thật,
+// không có transition nên mắt không nhận ra vì 2 ảnh giống hệt nhau)
+function goToNextImage(){
+  if(galleryImages.length <= 1) return;
+  const wasLast = currentImgIndex === galleryImages.length - 1;
+  currentImgIndex = (currentImgIndex + 1) % galleryImages.length;
+  trackPosition += 1;
+  setTrackTransform(trackPosition, false);
+  updateLightboxUI();
+  if(wasLast){
+    setTimeout(()=>{
+      trackPosition = 1; // vị trí thật của ảnh đầu tiên trong track mở rộng
+      setTrackTransform(trackPosition, true);
+    }, TRANSITION_MS);
+  }
+}
+
+// chuyển về ảnh trước đó — tương tự, luôn trượt đúng 1 bước về phía sau
+function goToPrevImage(){
+  if(galleryImages.length <= 1) return;
+  const wasFirst = currentImgIndex === 0;
+  currentImgIndex = (currentImgIndex - 1 + galleryImages.length) % galleryImages.length;
+  trackPosition -= 1;
+  setTrackTransform(trackPosition, false);
+  updateLightboxUI();
+  if(wasFirst){
+    setTimeout(()=>{
+      trackPosition = galleryImages.length; // vị trí thật của ảnh cuối cùng
+      setTrackTransform(trackPosition, true);
+    }, TRANSITION_MS);
+  }
 }
 
 document.querySelectorAll('.g-item').forEach((item, i)=>{
@@ -138,8 +188,8 @@ function closeLightbox(){
   document.body.style.overflow = '';
 }
 if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-if(lightboxPrev) lightboxPrev.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex - 1); });
-if(lightboxNext) lightboxNext.addEventListener('click', (e)=>{ e.stopPropagation(); showLightboxImage(currentImgIndex + 1); });
+if(lightboxPrev) lightboxPrev.addEventListener('click', (e)=>{ e.stopPropagation(); goToPrevImage(); });
+if(lightboxNext) lightboxNext.addEventListener('click', (e)=>{ e.stopPropagation(); goToNextImage(); });
 if(lightbox){
   lightbox.addEventListener('click', (e)=>{
     if(e.target === lightbox || e.target === lightboxViewport) closeLightbox(); // chạm ra ngoài ảnh để đóng
@@ -152,6 +202,16 @@ let touchStartY = 0;
 let isSwiping = false;
 let swipeIntentDecided = false;
 let swipeIsHorizontal = false;
+let pendingDragPercent = null;
+let dragRafId = null;
+
+// gộp các lần cập nhật transform vào 1 khung hình (requestAnimationFrame) để vuốt mượt, không giật
+function flushDragFrame(){
+  dragRafId = null;
+  if(pendingDragPercent === null) return;
+  lightboxTrack.style.transform = 'translateX(calc(-' + (trackPosition * 100) + '% + ' + pendingDragPercent + '%))';
+  pendingDragPercent = null;
+}
 
 if(lightboxViewport){
   lightboxViewport.addEventListener('touchstart', (e)=>{
@@ -179,18 +239,26 @@ if(lightboxViewport){
     if(swipeIsHorizontal){
       e.preventDefault(); // chặn cuộn trang khi đang vuốt ngang đổi ảnh
       const viewportWidth = lightboxViewport.clientWidth || 1;
-      const dragPercent = (dx / viewportWidth) * 100;
-      lightboxTrack.style.transform = 'translateX(calc(-' + (currentImgIndex * 100) + '% + ' + dragPercent + '%))';
+      pendingDragPercent = (dx / viewportWidth) * 100;
+      if(dragRafId === null){
+        dragRafId = requestAnimationFrame(flushDragFrame);
+      }
     }
   }, { passive: false });
 
   lightboxViewport.addEventListener('touchend', (e)=>{
     if(!isSwiping) return;
     isSwiping = false;
+
+    if(dragRafId !== null){
+      cancelAnimationFrame(dragRafId);
+      dragRafId = null;
+    }
+    pendingDragPercent = null;
     lightboxTrack.style.transition = '';
 
     if(!swipeIsHorizontal){
-      showLightboxImage(currentImgIndex); // không phải vuốt ngang -> giữ nguyên ảnh hiện tại
+      setTrackTransform(trackPosition, false); // không phải vuốt ngang -> giữ nguyên ảnh hiện tại
       return;
     }
 
@@ -199,10 +267,10 @@ if(lightboxViewport){
     const SWIPE_RATIO = 0.18; // vuốt qua ~18% chiều rộng khung là đủ để chuyển ảnh
 
     if(Math.abs(dx) / viewportWidth > SWIPE_RATIO){
-      if(dx < 0) showLightboxImage(currentImgIndex + 1); // vuốt sang trái -> ảnh sau
-      else showLightboxImage(currentImgIndex - 1);        // vuốt sang phải -> ảnh trước
+      if(dx < 0) goToNextImage(); // vuốt sang trái -> ảnh sau
+      else goToPrevImage();        // vuốt sang phải -> ảnh trước
     } else {
-      showLightboxImage(currentImgIndex); // vuốt chưa đủ xa -> bật lại đúng ảnh hiện tại
+      setTrackTransform(trackPosition, false); // vuốt chưa đủ xa -> bật lại đúng ảnh hiện tại
     }
   }, { passive: true });
 }
@@ -210,8 +278,8 @@ if(lightboxViewport){
 // hỗ trợ phím mũi tên trái/phải trên máy tính
 document.addEventListener('keydown', (e)=>{
   if(!lightbox.classList.contains('open')) return;
-  if(e.key === 'ArrowRight') showLightboxImage(currentImgIndex + 1);
-  if(e.key === 'ArrowLeft') showLightboxImage(currentImgIndex - 1);
+  if(e.key === 'ArrowRight') goToNextImage();
+  if(e.key === 'ArrowLeft') goToPrevImage();
   if(e.key === 'Escape') closeLightbox();
 });
 
@@ -301,10 +369,12 @@ if(prefersReducedMotion){
   document.querySelectorAll('section').forEach(section=>{
     const items = section.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
     items.forEach((el, i)=>{
-      el.style.transitionDelay = Math.min(i * 0.1, 0.4) + 's';
+      el.style.transitionDelay = Math.min(i * 0.07, 0.28) + 's';
     });
   });
 
+  // kích hoạt sớm hơn 1 chút (ngay khi phần tử vừa chạm mép dưới màn hình) để cảm giác
+  // luôn "đón đầu" theo đà cuộn, không bị khựng lại rồi mới bừng sáng
   const revealObserver = new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
       if(entry.isIntersecting){
@@ -312,7 +382,7 @@ if(prefersReducedMotion){
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px -2% 0px' });
 
   revealEls.forEach(el => revealObserver.observe(el));
 }
@@ -330,16 +400,16 @@ try{
   // ⚠️ THAY CÁC GIÁ TRỊ DƯỚI ĐÂY BẰNG CONFIG FIREBASE CỦA BẠN
   // (Lấy tại: Firebase Console > Project Settings > General > Your apps > SDK setup and configuration)
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
-  authDomain: "wdbinhthao.firebaseapp.com",
-  databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "wdbinhthao",
-  storageBucket: "wdbinhthao.firebasestorage.app",
-  messagingSenderId: "233769001209",
-  appId: "1:233769001209:web:e72aa4c53cef5545c68228",
-  measurementId: "G-HXEKMYH4SK"
-};
+  const firebaseConfig = {
+	  apiKey: "AIzaSyBnijOQ53VhUdRy0YUwrD8uiZWa7IgFlOI",
+	  authDomain: "wdbinhthao.firebaseapp.com",
+	  databaseURL: "https://wdbinhthao-default-rtdb.asia-southeast1.firebasedatabase.app",
+	  projectId: "wdbinhthao",
+	  storageBucket: "wdbinhthao.firebasestorage.app",
+	  messagingSenderId: "233769001209",
+	  appId: "1:233769001209:web:e72aa4c53cef5545c68228",
+	  measurementId: "G-HXEKMYH4SK"
+  };
 
   if(typeof firebase !== 'undefined'){
     firebase.initializeApp(firebaseConfig);

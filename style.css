@@ -332,14 +332,16 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .lightbox-viewport{
   position:absolute; inset:0;
   overflow:hidden;
+  touch-action:none; /* để JS toàn quyền xử lý vuốt, tránh trình duyệt tranh chấp cử chỉ gây giật */
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
  
 /* dải ảnh dài nằm ngang, mỗi ảnh chiếm đúng 100% khung nhìn, trượt bằng transform */
 .lightbox-track{
   display:flex; height:100%;
-  transition:transform .35s cubic-bezier(.25,.8,.35,1);
+  transition:transform .3s cubic-bezier(.22,.9,.32,1);
   will-change:transform;
+  backface-visibility:hidden; /* hạn chế flicker khi tăng tốc GPU trên một số webview */
 }
 .lightbox-slide{
   flex:0 0 100%; width:100%; height:100%;
@@ -527,21 +529,24 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 /* ---------- Reveal khi cuộn: chữ xuất hiện mượt, không cứng nhắc ---------- */
 .reveal, .reveal-left, .reveal-right, .reveal-scale{
   opacity:0;
-  transition:opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1);
+  transition:opacity .65s cubic-bezier(.22,.9,.32,1), transform .65s cubic-bezier(.22,.9,.32,1);
+  will-change:opacity, transform;
+  backface-visibility:hidden;
 }
-.reveal{ transform:translateY(22px); }
-.reveal-left{ transform:translate(-26px, 8px); }
-.reveal-right{ transform:translate(26px, 8px); }
-.reveal-scale{ transform:translateY(14px) scale(.92); }
-
+.reveal{ transform:translateY(16px); }
+.reveal-left{ transform:translate(-20px, 6px); }
+.reveal-right{ transform:translate(20px, 6px); }
+.reveal-scale{ transform:translateY(10px) scale(.94); }
+ 
 .reveal.revealed, .reveal-left.revealed, .reveal-right.revealed, .reveal-scale.revealed{
   opacity:1;
   transform:translate(0,0) scale(1);
+  will-change:auto; /* tắt sau khi chạy xong để tiết kiệm tài nguyên GPU */
 }
 @media (prefers-reduced-motion: reduce){
   .reveal, .reveal-left, .reveal-right, .reveal-scale{ opacity:1; transform:none; transition:none; }
 }
-
+ 
 footer{ padding:36px 20px calc(36px + env(safe-area-inset-bottom)); text-align:center; font-size:13px; color:#a89a83; }
 
 /* ---------- Tối ưu cho màn hình nhỏ (đa số khách mở qua Zalo/Messenger in-app browser) ---------- */
