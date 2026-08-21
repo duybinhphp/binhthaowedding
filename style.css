@@ -232,7 +232,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 #hero .fam p{ line-height:1.6; }
 
 /* ---------- Countdown ---------- */
-#countdown{ background:var(--cream-dark)}
+#countdown{ background:var(--cream)}
 #countdown .eyebrow{ color:var(--gold); }
 #countdown .title{ font-size:26px; margin:10px 0 30px; color:var(--gold); }
 .cd-grid{ display:flex; justify-content:center; gap:14px; }
