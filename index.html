@@ -82,6 +82,14 @@
       </div>
     </div>
   </section>
+
+<!-- GUEST INVITE : lời mời kèm tên khách (tự động điền từ link, ẩn nếu link không có tên) -->
+  <section id="guest-invite" hidden>
+    <p class="guest-invite-text reveal">
+      Trân trọng kính mời<br>
+      <span class="guest-name-fill guest-name-highlight">Bạn</span><br>
+    </p>
+  </section>  
   
   <!-- HERO -->
   <section id="hero">
@@ -103,12 +111,11 @@
   <!-- EVENT -->
   <section id="event">
     <div class="eyebrow reveal">Lễ Cưới</div>
-    <div class="title reveal" style="font-size:24px;margin:10px 0 4px;">Trân trọng kính mời</div>
-  <section id="guest-invite">
-    <p class="guest-invite-text reveal">
-    <span class="guest-name-fill guest-name-highlight">Bạn</span><br>
-    </p>
-  </section>
+    <div class="title reveal" style="font-size:24px;margin:10px 0 22px;">Trân trọng kính mời</div>
+    <div class="event-guest-name reveal guest-invite-only" id="event-guest-name" hidden>
+      <span class="guest-name-fill">Bạn</span>
+    </div>
+	
     <div class="event-cards">
       <div class="event-card reveal-left">
         <div class="event-tag">Lễ Vu Quy</div>

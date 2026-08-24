@@ -222,18 +222,18 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
 
-/* ---------- Guest invite : lời mời kèm tên khách ---------- */
-#guest-invite{ padding:13px 28px; background:var(--cream); }
+* ---------- Guest invite : lời mời kèm tên khách ---------- */
+#guest-invite{ padding:44px 28px; background:var(--cream); }
 .guest-invite-text{
   font-size:19px; line-height:1.8; color:#5a5145; max-width:340px; margin:0 auto;
 }
 .guest-name-highlight{
-  font-family:'Playfair Display',serif; font-weight:400; font-style:italic;
-  font-size:20px; color:var(--gold); display:inline-block; margin-top:2px;
+  font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
+  font-size:22px; color:var(--gold); display:inline-block; margin-top:2px;
 }
+ 
 .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
-
 
 /* ---------- Hero ---------- */
 #hero{ padding-top:60px; background:var(--cream-dark); }
@@ -253,7 +253,11 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .cd-item .num{ font-size:28px; font-weight:600; font-family:'Playfair Display',serif; }
 .cd-item .lbl{ font-size:11px; letter-spacing:1px; text-transform:uppercase; opacity:.8; margin-top:4px; }
 
-/* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
+* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
+.event-guest-name{
+  font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
+  font-size:20px; color:var(--gold); margin-top:-14px; margin-bottom:22px;
+}
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
   background:#fff; border:1px solid #eadfc9; border-radius:14px; padding:28px 24px;
@@ -268,7 +272,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .event-place{ font-size:20px; margin-bottom:8px; font-family:'Playfair Display',serif; }
 .event-addr{ font-size:16px; line-height:1.6; color:#6b6153; max-width:260px; margin:0 auto; }
 .event-time{
-  font-family:'Playfair Display',serif;font-size:17px; margin-top:16px; padding-top:16px; letter-spacing:1px; color:var(--ink);
+  font-size:17px; margin-top:16px; padding-top:16px; letter-spacing:1px; color:var(--ink);
   border-top:1px solid #f1e9dd;
 }
 .btn{
