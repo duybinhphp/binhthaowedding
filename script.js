@@ -2,6 +2,23 @@
    PHẦN 1 — GIAO DIỆN (chạy độc lập, luôn hoạt động dù Firebase lỗi)
    ============================================================ */
 
+/* ---------- Tên khách mời: tự động đọc từ link, ví dụ ?to=Chị Hồng ---------- */
+(function fillGuestName(){
+  const params = new URLSearchParams(window.location.search);
+  const guestName = (params.get('to') || params.get('ten') || params.get('guest') || '').trim();
+ 
+  if(!guestName) return; // không có tên trong link -> giữ nguyên chữ mặc định "Bạn"
+ 
+  // textContent tự động escape, an toàn trước việc chèn mã độc qua link
+  document.querySelectorAll('.guest-name-fill').forEach(el => {
+    el.textContent = guestName;
+  });
+ 
+  // hiện dòng "Kính mời: ..." trên phong bì (mặc định đang ẩn khi chưa có tên)
+  const luxGuestRow = document.getElementById('lux-guest-row');
+  if(luxGuestRow) luxGuestRow.hidden = false;
+})();
+
 /* ---------- Mở thiệp: chạm vào dấu sáp ---------- */
 const cover = document.getElementById('cover');
 const envelope = document.getElementById('envelope');
