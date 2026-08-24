@@ -225,11 +225,11 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 /* ---------- Guest invite : lời mời kèm tên khách ---------- */
 #guest-invite{ padding:44px 28px; background:var(--cream); }
 .guest-invite-text{
-  font-size:25px; line-height:1.8; color:#5a5145; max-width:340px; margin:0 auto;
+  font-size:19px; line-height:1.8; color:#5a5145; max-width:340px; margin:0 auto;
 }
 .guest-name-highlight{
   font-family:'Playfair Display',serif; font-weight:400; font-style:italic;
-  font-size:25px; color:var(--gold); display:inline-block; margin-top:2px;
+  font-size:20px; color:var(--gold); display:inline-block; margin-top:2px;
 }
  
 .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
