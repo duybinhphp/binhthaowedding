@@ -261,7 +261,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
-  background:#fff; border:1px solid #eadfc9; border-radius:14px; padding:36px 24px;
+  background:#fff; border:1px solid #eadfc9; border-radius:14px; padding:28px 30px;
   box-shadow:0 6px 20px -12px rgba(80,60,30,.18);
   text-align:center;
 }
