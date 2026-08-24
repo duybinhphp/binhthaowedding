@@ -223,7 +223,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
 
 /* ---------- Guest invite : lời mời kèm tên khách ---------- */
-#guest-invite{ padding:16px 28px; background:var(--cream); }
+#guest-invite{ padding:13px 28px; background:var(--cream); }
 .guest-invite-text{
   font-size:19px; line-height:1.8; color:#5a5145; max-width:340px; margin:0 auto;
 }
