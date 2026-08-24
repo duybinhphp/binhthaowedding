@@ -223,7 +223,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
 
 /* ---------- Guest invite : lời mời kèm tên khách ---------- */
-#guest-invite{ padding:44px 28px; background:var(--cream); }
+#guest-invite{ padding:16px 28px; background:var(--cream); }
 .guest-invite-text{
   font-size:19px; line-height:1.8; color:#5a5145; max-width:340px; margin:0 auto;
 }
@@ -231,9 +231,9 @@ section{ padding:70px 28px; text-align:center; position:relative; }
   font-family:'Playfair Display',serif; font-weight:400; font-style:italic;
   font-size:20px; color:var(--gold); display:inline-block; margin-top:2px;
 }
- 
 .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
+
 
 /* ---------- Hero ---------- */
 #hero{ padding-top:60px; background:var(--cream-dark); }
