@@ -257,7 +257,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 
 .event-guest-name{
   font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
-  font-size:26px; color:var(--gold); margin-top:-10px; margin-bottom:24px;
+  font-size:50px; color:var(--gold); margin-top:-10px; margin-bottom:40px;
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
