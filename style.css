@@ -254,15 +254,17 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .cd-item .lbl{ font-size:11px; letter-spacing:1px; text-transform:uppercase; opacity:.8; margin-top:4px; }
 
 * ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
+
 .event-guest-name{
   font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
-  font-size:20px; color:var(--gold); margin-top:-14px; margin-bottom:22px;
+  font-size:26px; color:var(--gold); margin-top:-10px; margin-bottom:24px;
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
   background:#fff; border:1px solid #eadfc9; border-radius:14px; padding:28px 24px;
   box-shadow:0 6px 20px -12px rgba(80,60,30,.18);
   text-align:center;
+}
 }
 .event-tag{
   display:inline-block; font-size:11px; letter-spacing:3px; text-transform:uppercase;
