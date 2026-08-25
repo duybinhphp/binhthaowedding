@@ -222,18 +222,6 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
 .eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
 
-* ---------- Guest invite : lời mời kèm tên khách ---------- */
-#guest-invite{ padding:44px 28px; background:var(--cream); }
-.guest-invite-text{
-  font-family:'Playfair Display',serif; font-weight:600; font-size:22px; line-height:1.8; color:var(--gold); max-width:340px; margin:0 auto;
-}
-.guest-name-highlight{
-  font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
-  font-size:22px; color:var(--gold); display:inline-block; margin-top:2px;
-}
- 
-.divider{ width:60px; height:1px; background:var(--gold); margin:20px auto; }
-.eyebrow{ letter-spacing:4px; font-size:13px; text-transform:uppercase; color:var(--gold); font-weight:600; }
 
 /* ---------- Hero ---------- */
 #hero{ padding-top:60px; background:var(--cream-dark); }
@@ -255,9 +243,9 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 
 * ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
 
-.event-guest-name{
+event-guest-name{
   font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
-  font-size:26px; color:var(--gold); display:inline-block; margin-top:2px;
+  font-size:24px; color:var(--gold); margin-top:-6px; margin-bottom:40px;
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{

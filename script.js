@@ -18,10 +18,6 @@
   const luxGuestRow = document.getElementById('lux-guest-row');
   if(luxGuestRow) luxGuestRow.hidden = false;
  
-  // hiện cả đoạn "Trân trọng kính mời..." dưới ảnh mở đầu (mặc định đang ẩn khi chưa có tên)
-  const guestInviteSection = document.getElementById('guest-invite');
-  if(guestInviteSection) guestInviteSection.hidden = false;
- 
   // hiện tên khách dưới tiêu đề "Trân trọng kính mời" ở phần Lễ Cưới
   const eventGuestName = document.getElementById('event-guest-name');
   if(eventGuestName) eventGuestName.hidden = false;
