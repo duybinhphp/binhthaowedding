@@ -62,7 +62,7 @@
       </div>
     </div>
     <div class="tap-hint">Chạm vào con dấu để mở thiệp</div>
-  </div>
+   </div>
  
   <button id="music-btn" aria-label="Bật/tắt nhạc">🎵</button>
   <audio id="bg-audio" loop src="nhacnen.mp3"></audio>
@@ -101,7 +101,7 @@
 
 
 	<!-- EVENT -->
-  <<section id="event">
+  <section id="event">
     <div class="eyebrow reveal">Lễ Cưới</div>
     <div class="title reveal" style="font-size:24px;margin:10px 0 22px;">Trân trọng kính mời</div>
     <div class="event-guest-name reveal guest-invite-only" id="event-guest-name" hidden>
@@ -140,7 +140,7 @@
   <span class="pname">Duy Bình</span>
   <img class="bouquet reveal-scale" src="images/hoa.png" alt="Bó hoa cưới" loading="lazy">
   <span class="pname">Hồng Thảo</span>
-</div>
+  </div>
   </section>
 
 
@@ -163,8 +163,12 @@
     </div>
   </section>
 
-  <!-- LIGHTBOX xem ảnh toàn màn hình -->
-  <div id="lightbox" class="lightbox">
+  <!-- Các modal toàn màn hình đặt NGOÀI .wrap (làm con trực tiếp của body) để
+     tránh lỗi position:fixed bị kẹt/lệch theo cuộn khi nằm trong khung có
+     overflow-x:hidden — lỗi hay gặp trên webview Zalo/Messenger. -->
+
+<!-- LIGHTBOX : xem ảnh toàn màn hình, vuốt ngang đổi ảnh (carousel trượt thật) -->
+<div id="lightbox" class="lightbox">
   <button id="lightbox-close" class="lightbox-close" aria-label="Đóng">✕</button>
   <button id="lightbox-prev" class="lightbox-nav prev" aria-label="Ảnh trước" hidden>‹</button>
   <div class="lightbox-viewport" id="lightbox-viewport">
@@ -293,7 +297,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <!-- App logic -->
-<script src="script.js"></script>
+<script src="script.js?v=3"></script>
 
 </body>
 </html>
