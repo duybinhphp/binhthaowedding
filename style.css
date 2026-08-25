@@ -248,7 +248,7 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 /* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
 .event-guest-name{
   font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
-  font-size:20px; color:var(--gold); margin-top:-6px; margin-bottom:40px;
+  font-size:18px; color:var(--gold); margin-top:-6px; margin-bottom:30px;
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
