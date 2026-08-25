@@ -111,9 +111,9 @@ h1,h2,h3, .script{font-family:'Playfair Display', serif;}
 .lux-divider{ width:46px; height:1px; background:var(--gold); margin:20px auto; opacity:.6; }
 .lux-date{ font-size:18px; letter-spacing:4px; color:var(--gold); }
 .lux-guest-row{
-  margin-top:16px; font-size:13px; letter-spacing:1px; color:#6b6153;
+  margin-top:16px; font-size:17px; letter-spacing:1px; color:#6b6153;
 }
-.lux-guest-name{ font-family:'Playfair Display',serif; font-weight:600; color:var(--ink); }
+.lux-guest-name{ font-family:'Playfair Display',serif; font-weight:600; color:var(--ink); }	
  
 /* dải nơ lụa mềm mại + dấu sáp, gói gọn trong một băng riêng dưới khối chữ, không đè chữ */
 .lux-seal-band{
