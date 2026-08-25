@@ -561,7 +561,7 @@ footer{ padding:36px 20px calc(36px + env(safe-area-inset-bottom)); text-align:c
 /* ---------- Tối ưu cho màn hình nhỏ (đa số khách mở qua Zalo/Messenger in-app browser) ---------- */
 @media (max-width:380px){
   section{ padding:52px 20px; }
-  #hero .couple{ font-size:34px; }
+  #hero .couple{ font-size:38px; }
   #countdown .title{ font-size:22px; }
   .cd-item{ min-width:56px; padding:12px 6px; }
   .cd-item .num{ font-size:24px; }
@@ -570,4 +570,8 @@ footer{ padding:36px 20px calc(36px + env(safe-area-inset-bottom)); text-align:c
   .lux-frame{ min-height:360px; padding:36px 20px 32px; }
   .lux-seal-band{ margin-top:28px; }
   .g-grid{ gap:8px; }
+  .persons{ gap:8px; }
+  .persons .p{ width:108px; }
+  .persons-names{ gap:8px; }
+  .persons-names .bouquet{ font-size:22px; }
 }
