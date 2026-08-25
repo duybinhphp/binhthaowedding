@@ -245,9 +245,8 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 .cd-item .num{ font-size:28px; font-weight:600; font-family:'Playfair Display',serif; }
 .cd-item .lbl{ font-size:11px; letter-spacing:1px; text-transform:uppercase; opacity:.8; margin-top:4px; }
 
-* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
-
-event-guest-name{
+/* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
+.event-guest-name{
   font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
   font-size:24px; color:var(--gold); margin-top:-6px; margin-bottom:48px;
 }
