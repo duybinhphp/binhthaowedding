@@ -111,7 +111,7 @@ h1,h2,h3, .script{font-family:'Playfair Display', serif;}
 .lux-divider{ width:46px; height:1px; background:var(--gold); margin:20px auto; opacity:.6; }
 .lux-date{ font-size:18px; letter-spacing:4px; color:var(--gold); }
 .lux-guest-row{
-  margin-top:20px;
+  margin-top:26px;
 }
 .lux-guest-label{
   font-family:'Great Vibes',cursive; font-size:26px; color:var(--ink); line-height:1.3;
