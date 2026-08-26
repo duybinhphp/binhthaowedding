@@ -2,16 +2,31 @@
    PHẦN 1 — GIAO DIỆN (chạy độc lập, luôn hoạt động dù Firebase lỗi)
    ============================================================ */
 
-/* ---------- Tên khách mời: tự động đọc từ link, ví dụ ?to=Chị Hồng ---------- */
+/* ---------- Tên khách mời: tự động đọc từ link ----------
+   Link mang tên ĐẦY ĐỦ, ví dụ: ?to=Anh Minh và gia đình
+   - Ngoài phong bì: chỉ hiện phần TÊN NGẮN (trước chữ "và") -> "Anh Minh"
+   - Trong phần Event: hiện NGUYÊN VĂN đầy đủ -> "Anh Minh và gia đình"
+*/
 (function fillGuestName(){
   const params = new URLSearchParams(window.location.search);
   const guestName = (params.get('to') || params.get('ten') || params.get('guest') || '').trim();
  
   if(!guestName) return; // không có tên trong link -> giữ nguyên chữ mặc định "Bạn"
  
+  // tách phần tên ngắn gọn (trước chữ " và ") để dùng ngoài phong bì
+  function extractShortName(fullName){
+    const idx = fullName.indexOf(' và ');
+    if(idx === -1) return fullName; // không có chữ "và" -> dùng nguyên cả chuỗi
+    return fullName.slice(0, idx).trim();
+  }
+  const shortName = extractShortName(guestName);
+ 
   // textContent tự động escape, an toàn trước việc chèn mã độc qua link
   document.querySelectorAll('.guest-name-fill').forEach(el => {
-    el.textContent = guestName;
+    el.textContent = guestName; // tên đầy đủ - dùng trong phần Event
+  });
+  document.querySelectorAll('.guest-name-short-fill').forEach(el => {
+    el.textContent = shortName; // chỉ tên - dùng ngoài phong bì
   });
  
   // hiện dòng "Kính mời: ..." trên phong bì (mặc định đang ẩn khi chưa có tên)

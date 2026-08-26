@@ -111,9 +111,15 @@ h1,h2,h3, .script{font-family:'Playfair Display', serif;}
 .lux-divider{ width:46px; height:1px; background:var(--gold); margin:20px auto; opacity:.6; }
 .lux-date{ font-size:18px; letter-spacing:4px; color:var(--gold); }
 .lux-guest-row{
-  margin-top:16px; font-size:17px; letter-spacing:1px; color:#6b6153;
+  margin-top:20px;
 }
-.lux-guest-name{ font-family:'Playfair Display',serif; font-weight:600; color:var(--ink); }	
+.lux-guest-label{
+  font-family:'Great Vibes',cursive; font-size:22px; color:var(--ink); line-height:1.3;
+}
+.lux-guest-name{
+  font-family:'Playfair Display',serif; font-weight:600; font-size:19px;
+  letter-spacing:.5px; color:var(--gold); margin-top:6px;
+}
  
 /* dải nơ lụa mềm mại + dấu sáp, gói gọn trong một băng riêng dưới khối chữ, không đè chữ */
 .lux-seal-band{
@@ -247,8 +253,8 @@ section{ padding:70px 28px; text-align:center; position:relative; }
 
 /* ---------- Event / location : Lễ Vu Quy + Lễ Thành Hôn ---------- */
 .event-guest-name{
-  font-family:'Playfair Display',serif; font-weight:400; font-style:italic;
-  font-size:18px; color:var(--gold); margin-top:-10px; margin-bottom:20px;
+  font-family:'Playfair Display',serif; font-weight:600; font-style:italic;
+  font-size:18px; color:var(--gold); margin-top:-6px; margin-bottom:30px;
 }
 .event-cards{ display:flex; flex-direction:column; gap:16px; }
 .event-card{
