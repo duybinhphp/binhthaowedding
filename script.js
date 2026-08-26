@@ -3,13 +3,36 @@
    ============================================================ */
 
 /* ---------- Tên khách mời: tự động đọc từ link ----------
-   Link mang tên ĐẦY ĐỦ, ví dụ: ?to=Anh Minh và gia đình
+   Cách 1 (khuyên dùng) - link mang tên đã MÃ HOÁ Base64, ví dụ: ?g=QW5oIE1pbmg...
+     Chuỗi này chỉ gồm chữ/số/ký tự an toàn, KHÔNG có dấu cách hay dấu tiếng Việt,
+     nên KHÔNG BAO GIỜ bị Messenger/Zalo cắt mất khi gửi. Web tự giải mã ngược lại
+     thành tên đầy đủ, không cần file danh sách phụ nào khác.
+   Cách 2 (dự phòng, tương thích link cũ) - link mang tên trực tiếp, ví dụ: ?to=Anh Minh và gia đình
+ 
+   Dù theo cách nào, tên đầy đủ sau khi lấy được sẽ xử lý giống nhau:
    - Ngoài phong bì: chỉ hiện phần TÊN NGẮN (trước chữ "và") -> "Anh Minh"
    - Trong phần Event: hiện NGUYÊN VĂN đầy đủ -> "Anh Minh và gia đình"
 */
+function decodeGuestCode(code){
+  try{
+    let base64 = code.replace(/-/g, '+').replace(/_/g, '/');
+    while(base64.length % 4) base64 += '=';
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  }catch(e){
+    return ''; // mã lỗi/không hợp lệ -> bỏ qua, không hiện gì sai lệch
+  }
+}
+ 
 (function fillGuestName(){
   const params = new URLSearchParams(window.location.search);
-  const guestName = (params.get('to') || params.get('ten') || params.get('guest') || '').trim();
+  const guestCode = (params.get('g') || '').trim();
+  let guestName = guestCode ? decodeGuestCode(guestCode) : '';
+ 
+  if(!guestName){
+    guestName = (params.get('to') || params.get('ten') || params.get('guest') || '').trim();
+  }
  
   if(!guestName) return; // không có tên trong link -> giữ nguyên chữ mặc định "Bạn"
  
