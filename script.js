@@ -3,11 +3,12 @@
    ============================================================ */
 
 /* ---------- Tên khách mời: tự động đọc từ link ----------
-   Cách 1 (khuyên dùng) - link mang tên đã MÃ HOÁ Base64, ví dụ: ?g=QW5oIE1pbmg...
-     Chuỗi này chỉ gồm chữ/số/ký tự an toàn, KHÔNG có dấu cách hay dấu tiếng Việt,
-     nên KHÔNG BAO GIỜ bị Messenger/Zalo cắt mất khi gửi. Web tự giải mã ngược lại
-     thành tên đầy đủ, không cần file danh sách phụ nào khác.
-   Cách 2 (dự phòng, tương thích link cũ) - link mang tên trực tiếp, ví dụ: ?to=Anh Minh và gia đình
+   Cách 1 (khuyên dùng) - mã hoá Base64 gắn sau dấu # (fragment), ví dụ: #g=QW5oIE1pbmg...
+     Dùng dấu # thay vì ?  vì Messenger có thể tự động cắt bỏ toàn bộ phần "?..." (query string)
+     khi xử lý link chia sẻ - còn phần sau dấu # thì không bị gửi lên server, không bị đụng tới.
+   Cách 2 (dự phòng) - mã hoá Base64 gắn sau dấu ?, ví dụ: ?g=QW5oIE1pbmg... (dùng khi mở trực tiếp
+     bằng trình duyệt thường, không qua app chat hay bọc link)
+   Cách 3 (dự phòng, tương thích link cũ nhất) - tên trực tiếp, ví dụ: ?to=Anh Minh và gia đình
  
    Dù theo cách nào, tên đầy đủ sau khi lấy được sẽ xử lý giống nhau:
    - Ngoài phong bì: chỉ hiện phần TÊN NGẮN (trước chữ "và") -> "Anh Minh"
@@ -26,61 +27,42 @@ function decodeGuestCode(code){
 }
  
 (function fillGuestName(){
-
-  // Ưu tiên đọc tên từ dạng link:
-  // /g/QW5oIE1pbmggdsOgIGdpYSDEkcOsbmg
-  const path = window.location.pathname;
-  const match = path.match(/\/g\/([^\/]+)/);
-
-  let guestCode = match ? match[1] : '';
+  const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  const hashParams = new URLSearchParams(hashStr);
+  const searchParams = new URLSearchParams(window.location.search);
+ 
+  const guestCode = (hashParams.get('g') || searchParams.get('g') || '').trim();
   let guestName = guestCode ? decodeGuestCode(guestCode) : '';
-
-  // Dự phòng link cũ dạng ?g=
+ 
   if(!guestName){
-    const params = new URLSearchParams(window.location.search);
-    guestCode = (params.get('g') || '').trim();
-    guestName = guestCode ? decodeGuestCode(guestCode) : '';
-
-    // Dự phòng tiếp: ?to= / ?ten= / ?guest=
-    if(!guestName){
-      guestName = (
-        params.get('to') ||
-        params.get('ten') ||
-        params.get('guest') ||
-        ''
-      ).trim();
-    }
+    guestName = (searchParams.get('to') || searchParams.get('ten') || searchParams.get('guest') || '').trim();
   }
-
-  if(!guestName) return;
-
-  // Tách tên ngắn trước chữ " và "
+ 
+  if(!guestName) return; // không có tên trong link -> giữ nguyên chữ mặc định "Bạn"
+ 
+  // tách phần tên ngắn gọn (trước chữ " và ") để dùng ngoài phong bì
   function extractShortName(fullName){
     const idx = fullName.indexOf(' và ');
-    if(idx === -1) return fullName;
+    if(idx === -1) return fullName; // không có chữ "và" -> dùng nguyên cả chuỗi
     return fullName.slice(0, idx).trim();
   }
-
   const shortName = extractShortName(guestName);
-
-  // Tên đầy đủ
+ 
+  // textContent tự động escape, an toàn trước việc chèn mã độc qua link
   document.querySelectorAll('.guest-name-fill').forEach(el => {
-    el.textContent = guestName;
+    el.textContent = guestName; // tên đầy đủ - dùng trong phần Event
   });
-
-  // Tên ngắn
   document.querySelectorAll('.guest-name-short-fill').forEach(el => {
-    el.textContent = shortName;
+    el.textContent = shortName; // chỉ tên - dùng ngoài phong bì
   });
-
-  // Hiện "Kính mời..."
+ 
+  // hiện dòng "Kính mời: ..." trên phong bì (mặc định đang ẩn khi chưa có tên)
   const luxGuestRow = document.getElementById('lux-guest-row');
   if(luxGuestRow) luxGuestRow.hidden = false;
-
-  // Hiện tên khách trong phần Lễ Cưới
+ 
+  // hiện tên khách dưới tiêu đề "Trân trọng kính mời" ở phần Lễ Cưới
   const eventGuestName = document.getElementById('event-guest-name');
   if(eventGuestName) eventGuestName.hidden = false;
-
 })();
 
 /* ---------- Mở thiệp: chạm vào dấu sáp ---------- */
