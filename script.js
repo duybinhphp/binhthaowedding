@@ -27,54 +27,25 @@ function decodeGuestCode(code){
 }
  
 (function fillGuestName(){
-
-  const path = window.location.pathname;
-  const match = path.match(/\/g\/([^\/]+)/);
-
-  let guestCode = match ? match[1].trim() : '';
+  const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  const hashParams = new URLSearchParams(hashStr);
+  const searchParams = new URLSearchParams(window.location.search);
+ 
+  const guestCode = (hashParams.get('g') || searchParams.get('g') || '').trim();
   let guestName = guestCode ? decodeGuestCode(guestCode) : '';
-
-  // Hỗ trợ link cũ ?g= để không làm hỏng link đã tạo trước đây
+ 
   if(!guestName){
-    const params = new URLSearchParams(window.location.search);
-    guestCode = (params.get('g') || '').trim();
-    guestName = guestCode ? decodeGuestCode(guestCode) : '';
-
-    if(!guestName){
-      guestName = (
-        params.get('to') ||
-        params.get('ten') ||
-        params.get('guest') ||
-        ''
-      ).trim();
-    }
+    guestName = (searchParams.get('to') || searchParams.get('ten') || searchParams.get('guest') || '').trim();
   }
-
-  if(!guestName) return;
-
+ 
+  if(!guestName) return; // không có tên trong link -> giữ nguyên chữ mặc định "Bạn"
+ 
+  // tách phần tên ngắn gọn (trước chữ " và ") để dùng ngoài phong bì
   function extractShortName(fullName){
     const idx = fullName.indexOf(' và ');
-    if(idx === -1) return fullName;
+    if(idx === -1) return fullName; // không có chữ "và" -> dùng nguyên cả chuỗi
     return fullName.slice(0, idx).trim();
   }
-
-  const shortName = extractShortName(guestName);
-
-  document.querySelectorAll('.guest-name-fill').forEach(el => {
-    el.textContent = guestName;
-  });
-
-  document.querySelectorAll('.guest-name-short-fill').forEach(el => {
-    el.textContent = shortName;
-  });
-
-  const luxGuestRow = document.getElementById('lux-guest-row');
-  if(luxGuestRow) luxGuestRow.hidden = false;
-
-  const eventGuestName = document.getElementById('event-guest-name');
-  if(eventGuestName) eventGuestName.hidden = false;
-
-})();
   const shortName = extractShortName(guestName);
  
   // textContent tự động escape, an toàn trước việc chèn mã độc qua link
